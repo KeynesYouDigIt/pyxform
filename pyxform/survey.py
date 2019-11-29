@@ -973,6 +973,8 @@ class Survey(Section):
                 else:
                     file_obj.write(self._to_ugly_xml(warnings))
         except Exception as error:
+            import ipdb
+            ipdb.set_trace()
             if os.path.exists(path):
                 os.unlink(path)
             raise error
