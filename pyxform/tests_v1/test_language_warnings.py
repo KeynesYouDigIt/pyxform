@@ -97,6 +97,26 @@ class LanguageWarningTest(PyxformTestCase):
         os.unlink(tmp.name)
 
 
+    def test_translations_and_choice_filters(self):
+        self.assertPyxformXform(
+            name="translations_choice_filters",
+            id_string="transl",
+            md="""
+            | survey  |                    |          |                     |                    |
+            |         | type               | name     | label::English (en) | choice_filter      |
+            |         | select_one country | country  | Country             |                    |
+            |         | select_one city    | city     | City                | country=${country} |
+            | choices |                    |          |                     |                    |
+            |         | list_name          | name     | label               |                    |
+            |         | country            | france   | France              |                    |
+            |         | country            | canada   | Canada              |                    |
+            |         | city               | grenoble | Grenoble            |                    |
+            |         | city               | quebec   | Quebec              |                    |
+            """,
+            errored=False,
+            debug= True
+        )
+
     def test_missing_translation_no_default_lang_media_has_no_language(self):
         # form should test media tag w NO default language set.
         survey = self.md_to_pyxform_survey(
