@@ -639,55 +639,31 @@ class Survey(Section):
                 paths[path] = paths.get(path, set()).union(content.keys())
 
         for lang, translation in self._translations.items():
-            this_path_has_warning = False
             for path, content_types in paths.items():
                 if path not in self._translations[lang]:
                     self._translations[lang][path] = {}
-                    # missing question/question thingy thats like a hint
-                    question_and_column = path.split(":")
-                    missing_warning = self._generate_missing_translation_warning(
-                        lang, question_and_column[0], question_and_column[1]
-                    )
-                    warnings.append(missing_warning)
-                    # no need to warn about content types missing translations since the
-                    # whole path has a warning now.
-                    this_path_has_warning = True
-
                 for content_type in content_types:
                     if content_type not in self._translations[lang][path]:
                         self._translations[lang][path][content_type] = u"-"
-                        # missing question thingy thats like media
-                        if not this_path_has_warning:
-                            # the path has a translation but the content type is missing one.
-                            missing_warning = self._generate_missing_translation_warning(
-                                lang, path.split(":")[0], content_type
-                            )
-                            warnings.append(missing_warning)
+                        # from the issue description
+                        ## "If you have columns with language
+                        ## and columns without language,
+                        ## warn about setting a default language"
+                        question_name = path.split(":")[0]
+                        missing_warning = (
+                            "Missing translation for content on question! " + 
+                            "language lacking translation: " + lang + 
+                            "\n question name: " + question_name +
+                            ## todo - improve this, ideally references column name. 
+                            "\n content: " + content_type
+                        ) if lang != 'default' else (
+                            "A `default_language` has not been set on this form.\n" +
+                            "Set this in the settings tab and columns with no set " +
+                            "language will default to the language specified there."
+                        )
+                        warnings.append(missing_warning)
 
-    def _generate_missing_translation_warning(self, lang, question_name, column_name):
-        found_on_msg = (
-            "\n--\n Question missing translation: "
-            + question_name
-            + "\n Column missing: "
-            + column_name
-        )
-
-        if lang == "default":
-            return (
-                "\tDefault language not set," + " with missing default translations."
-                " Please consider setting a `default_language` in your"
-                + " settings tab to insure questions and options appear"
-                + " as expected."
-                + found_on_msg
-            )
-
-        return (
-            "\tMissing field translations found for "
-            + lang
-            + " field may not appear as expected."
-            + found_on_msg
-        )
-
+        
     def _setup_media(self):
         """
         Traverse the survey, find all the media, and put in into the \
@@ -973,8 +949,6 @@ class Survey(Section):
                 else:
                     file_obj.write(self._to_ugly_xml(warnings))
         except Exception as error:
-            import ipdb
-            ipdb.set_trace()
             if os.path.exists(path):
                 os.unlink(path)
             raise error
