@@ -676,16 +676,32 @@ class Survey(Section):
         When translations are not provided "-" will be used.
         This disables any of the default_language fallback functionality.
         """
+        
+        # Create a paths:content_types map to track content types found at each path
         paths = {}
-        for lang, translation in self._translations.items():
-            for path, content in translation.items():
+        for lang, translation_dict in self._translations.items():
+            for path, content in translation_dict.items():
                 paths[path] = paths.get(path, set()).union(content.keys())
+        #  'paths': {'/pyxform_autotestname/opt:hint': {'long'},
+        #            '/pyxform_autotestname/opt:label': {'image', 'long'},
+        #            'opts-0': {'long'},
+        #            'opts-1': {'long'}},
+
+        # missing_def = [
+        #     path for path in paths.keys() if path not in self._translations['default']
+        # ]
+        # import ipdb; ipdb.set_trace()
+
+
 
         for lang, translation in self._translations.items():
             for path, content_types in paths.items():
                 if path not in self._translations[lang]:
+                    #import ipdb; ipdb.set_trace()
+                    # can we get the _question name_ instead of a path or content type?
                     self._translations[lang][path] = {}
                 for content_type in content_types:
+                    print(f'{lang} is missing translations for path -> {path} cont_type -> {content_type} ')
                     if content_type not in self._translations[lang][path]:
                         self._translations[lang][path][content_type] = "-"
 
