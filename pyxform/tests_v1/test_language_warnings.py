@@ -96,14 +96,14 @@ class LanguageWarningTest(PyxformTestCase):
     def test_incomplete_translations(self):
         survey = self.md_to_pyxform_survey(
             """
-            | survey |                 |                 |        |                     |                    |              |
-            |        | type            | name            | label  | label::English (en) | hint::Spanish (es) | media::image |
-            |        | select_one opts | option_question | My opt | My opt in English   | elige su opcion    | opt.jpg      |
-            |        | note            | splain          | splain |                     | reeeeeee                  |              |     
-            | choices|                 |                 |        |                     |                    |              |
-            |        | list_name       | name            | label  | label::Spanish (es) |                    |              |
-            |        | opts            | opt1            | Opt1   | Opc1                |                    |              |
-            |        | opts            | opt2            | Opt2   | Opc2                |                    |              |
+            | survey |                 |                 |        |                     |                    |              |                    |
+            |        | type            | name            | label  | label::English (en) | hint::Spanish (es) | media::image | constraint_message |
+            |        | select_one opts | option_question | My opt | My opt in English   | elige su opcion    | opt.jpg      | asdf               |
+            |        | note            | splain          | splain |                     | reeeeeee           |              |                    |
+            | choices|                 |                 |        |                     |                    |              |                    |
+            |        | list_name       | name            | label  | label::Spanish (es) |                    |              |                    |
+            |        | opts            | opt1            | Opt1   | Opc1                |                    |              |                    |
+            |        | opts            | opt2            | Opt2   | Opc2                |                    |              |                    |
             """
         )
 

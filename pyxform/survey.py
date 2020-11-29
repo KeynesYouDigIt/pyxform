@@ -682,11 +682,6 @@ class Survey(Section):
         for lang, translation_dict in self._translations.items():
             for path, content in translation_dict.items():
                 paths[path] = paths.get(path, set()).union(content.keys())
-        #  'paths': {'/pyxform_autotestname/opt:hint': {'long'},
-        #            '/pyxform_autotestname/opt:label': {'image', 'long'},
-        #            'opts-0': {'long'},
-        #            'opts-1': {'long'}},
-
         # missing_def = [
         #     path for path in paths.keys() if path not in self._translations['default']
         # ]
@@ -701,7 +696,8 @@ class Survey(Section):
                     # can we get the _question name_ instead of a path or content type?
                     self._translations[lang][path] = {}
                 for content_type in content_types:
-                    print(f'{lang} is missing translations for path -> {path} cont_type -> {content_type} ')
+                    print(f'{lang} translations for path -> {path} cont_type -> {content_type} ')
+                    # TODO - SAFELY parse path into the warning we want....
                     if content_type not in self._translations[lang][path]:
                         self._translations[lang][path][content_type] = "-"
 
