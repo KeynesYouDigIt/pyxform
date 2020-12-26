@@ -657,7 +657,7 @@ class Survey(Section):
             has_media = bool(choice_list[0].get("media"))
             if not multi_language and not has_media:
                 continue
-            for idx, choice in zip(range(len(choice_list)), choice_list):
+            for idx, choice in enumerate(choice_list):
                 for name, choice_value in choice.items():
                     itext_id = "-".join([list_name, str(idx)])
                     if isinstance(choice_value, dict):
@@ -680,26 +680,42 @@ class Survey(Section):
         # Create a paths:content_types map to track content types found at each path
         paths = {}
         for lang, translation_dict in self._translations.items():
-            for path, content in translation_dict.items():
+            for path, content in translation_dict.items():                
                 paths[path] = paths.get(path, set()).union(content.keys())
-        # missing_def = [
-        #     path for path in paths.keys() if path not in self._translations['default']
-        # ]
-        # import ipdb; ipdb.set_trace()
-
-
 
         for lang, translation in self._translations.items():
             for path, content_types in paths.items():
                 if path not in self._translations[lang]:
-                    #import ipdb; ipdb.set_trace()
-                    # can we get the _question name_ instead of a path or content type?
                     self._translations[lang][path] = {}
                 for content_type in content_types:
-                    print(f'{lang} translations for path -> {path} cont_type -> {content_type} ')
-                    # TODO - SAFELY parse path into the warning we want....
                     if content_type not in self._translations[lang][path]:
+                        # TODO - 
+                        # _ Determine the right "column name" to include in the warning
+
+
+                        # this covers our base case well, and is funcitnal but UGLY for other cases
+                        # like binds and choice lists....
+
+                        # I would _love_ to be able to do something like
+                        # element = self.get_via_xpath(path)
+                        # warning = f'missing for {element.human_friendly_reference_to_element}'
+                        # but this is supes hard for some reason.
+                        # I could write an @property that does this and pass it along...
+                        # a cure worse than the disease? seems like alot of work :(
+
+                        print(path)
+                        import ipdb; ipdb.set_trace()
+                        column_name = (
+                            path[path.find(':')+1:]
+                            if content_type in ['long', 'guidance'] 
+                            else content_type
+                        )
+                        message = (
+                            f'Translation for {lang} missing for the column: {column_name}'
+                        )
+                        print(message)
                         self._translations[lang][path][content_type] = "-"
+                    print('*****')
 
     def _setup_media(self):
         """

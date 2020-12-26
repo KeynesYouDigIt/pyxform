@@ -96,22 +96,22 @@ class LanguageWarningTest(PyxformTestCase):
     def test_incomplete_translations(self):
         survey = self.md_to_pyxform_survey(
             """
-            | survey |                 |                 |        |                     |                    |              |                    |
-            |        | type            | name            | label  | label::English (en) | hint::Spanish (es) | media::image | constraint_message |
-            |        | select_one opts | option_question | My opt | My opt in English   | elige su opcion    | opt.jpg      | asdf               |
-            |        | note            | splain          | splain |                     | reeeeeee           |              |                    |
-            | choices|                 |                 |        |                     |                    |              |                    |
-            |        | list_name       | name            | label  | label::Spanish (es) |                    |              |                    |
-            |        | opts            | opt1            | Opt1   | Opc1                |                    |              |                    |
-            |        | opts            | opt2            | Opt2   | Opc2                |                    |              |                    |
+            | survey |                 |                 |                      |                     |                    |              |                      |                                  |
+            |        | type            | name            | label                | label::English (en) | hint::Spanish (es) | media::image | choice_filter        | constraint                       | constraint_message::Spanish (es) |
+            |        | select_one opts | option_question | My opt               | My opt in English   | elige su opcion    | opt.jpg      | option_question != ''|                                  |                                  |
+            |        | note            | splain          | splain               |                     | explique su elecn  |              |                      | string-length(.) > 1             | demasiado corto                  |                                  |
+            | choices|                 |                 |                      |                     |                    |              |                      |                                  |                                  |
+            |        | list_name       | name            | label::English (en)  | label::Spanish (es) |                    |              |                      |                                  |                                  |
+            |        | opts            | opt1            | Opt1                 | Opc1                |                    |              |                      |                                  |                                  |
+            |        | opts            | opt2            | Opt2                 | Opc2                |                    |              |                      |                                  
             """
         )
-
+                      
         warnings = []
         tmp = tempfile.NamedTemporaryFile(suffix=".xml", delete=False)
-        tmp.close()
+        tmp.close() 
         survey.print_xform_to_file(tmp.name, warnings=warnings)
         ## REMEMBER TO TEST FOR THE DEFAULT LANG ISSUES TOO. labels and hints will not appear correct in the current form.
-
+        ## should also add a choice filter since it caused a regression last time (issue 355)
         self.assertTrue(len(warnings) == 0)
         os.unlink(tmp.name)
