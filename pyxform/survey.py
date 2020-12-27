@@ -703,17 +703,15 @@ class Survey(Section):
                         # I could write an @property that does this and pass it along...
                         # a cure worse than the disease? seems like alot of work :(
 
-                        print(path)
-                        import ipdb; ipdb.set_trace()
                         column_name = (
                             path[path.find(':')+1:]
                             if content_type in ['long', 'guidance'] 
                             else content_type
                         )
-                        message = (
+                        missing_translation_message = (
                             f'Translation for {lang} missing for the column: {column_name}'
                         )
-                        print(message)
+                        print(missing_translation_message)
                         self._translations[lang][path][content_type] = "-"
                     print('*****')
 
