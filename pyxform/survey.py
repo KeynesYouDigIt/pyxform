@@ -221,6 +221,7 @@ class Survey(Section):
         """
         calls necessary preparation methods, then returns the xml.
         """
+
         self.validate()
         self._setup_xpath_dictionary()
 
@@ -630,7 +631,8 @@ class Survey(Section):
             # function
             parent = element.get("parent")
             if parent and not parent.get("choice_filter"):
-                for d in element.get_translations(self.default_language):
+                translations_for_element = element.get_translations(self.default_language)
+                for d in translations_for_element:
                     translation_path = d["path"]
                     form = "long"
 
@@ -641,16 +643,16 @@ class Survey(Section):
                     self._translations[d["lang"]][
                         translation_path
                     ] = self._translations[d["lang"]].get(translation_path, {})
-
                     self._translations[d["lang"]][translation_path].update(
                         {
                             form: {
                                 "text": d["text"],
                                 "output_context": d["output_context"],
+                                # TODO - consider adding more context here for downstream needs
+                                # (such as the missing translation warning, which is sometimes cryptic )
                             }
                         }
                     )
-
         # This code sets up translations for choices in filtered selects.
         for list_name, choice_list in self.choices.items():
             multi_language = isinstance(choice_list[0].get("label"), dict)
@@ -689,31 +691,31 @@ class Survey(Section):
                     self._translations[lang][path] = {}
                 for content_type in content_types:
                     if content_type not in self._translations[lang][path]:
-                        # TODO - 
-                        # _ Determine the right "column name" to include in the warning
-
-
-                        # this covers our base case well, and is funcitnal but UGLY for other cases
-                        # like binds and choice lists....
-
-                        # I would _love_ to be able to do something like
-                        # element = self.get_via_xpath(path)
-                        # warning = f'missing for {element.human_friendly_reference_to_element}'
-                        # but this is supes hard for some reason.
-                        # I could write an @property that does this and pass it along...
-                        # a cure worse than the disease? seems like alot of work :(
-
-                        column_name = (
-                            path[path.find(':')+1:]
-                            if content_type in ['long', 'guidance'] 
-                            else content_type
+                        column_name = self._get_column_name_from_translation_path(path, content_type)
+                        missing_translation_warning = (
+                            f'There is no default language set, and no language specified for: {column_name},'
+                            ' Set a default language in the settings tab, or specifiy the language of this column.'
+                        ) if lang == 'default' else (
+                            f'Translation for {lang} missing for: {column_name}'
                         )
-                        missing_translation_message = (
-                            f'Translation for {lang} missing for the column: {column_name}'
-                        )
-                        print(missing_translation_message)
+                        self.internal_warnings.add(missing_translation_warning)
                         self._translations[lang][path][content_type] = "-"
-                    print('*****')
+
+    def _get_column_name_from_translation_path(self, path, content_type):
+        if content_type not in ['long', 'guidance']:
+            return content_type
+
+        survey_column_name_ix = path.find(':')
+        if survey_column_name_ix > -1:
+            return path[path.find(':')+1:]
+        if path.find('-') > -1:
+            choice_list_name = { cl for cl in self.choices.keys() if cl == path[:path.find('-')] }
+            if choice_list_name:
+                return 'choice label for ' + choice_list_name.pop()
+        
+        # TODO - improve this function or consider a reworking of _add_empty_translations to better reflect needs.
+        return path
+
 
     def _setup_media(self):
         """
@@ -1085,9 +1087,9 @@ class Survey(Section):
             warnings.extend(enketo_validate.check_xform(path))
 
         # Warn if one or more translation is missing a valid IANA subtag
-        translations = self._translations.keys()
-        if translations:
-            bad_languages = get_languages_with_bad_tags(translations)
+        langauges = self._translations.keys()
+        if langauges:
+            bad_languages = get_languages_with_bad_tags(langauges)
             if bad_languages:
                 warnings.append(
                     "\tThe following language declarations do not contain "
@@ -1095,7 +1097,8 @@ class Survey(Section):
                     + ", ".join(bad_languages)
                     + ". "
                     + "Learn more: http://xlsform.org#multiple-language-support"
-                )
+                )        
+        warnings.extend(self.internal_warnings)
 
     def to_xml(self, validate=True, pretty_print=True, warnings=None, enketo=False):
         """

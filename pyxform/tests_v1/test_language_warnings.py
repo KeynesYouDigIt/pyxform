@@ -90,6 +90,7 @@ class LanguageWarningTest(PyxformTestCase):
         tmp.close()
         survey.print_xform_to_file(tmp.name, warnings=warnings)
 
+        import ipdb; ipdb.set_trace()
         self.assertTrue(len(warnings) == 0)
         os.unlink(tmp.name)
 
@@ -111,7 +112,13 @@ class LanguageWarningTest(PyxformTestCase):
         tmp = tempfile.NamedTemporaryFile(suffix=".xml", delete=False)
         tmp.close() 
         survey.print_xform_to_file(tmp.name, warnings=warnings)
-        ## REMEMBER TO TEST FOR THE DEFAULT LANG ISSUES TOO. labels and hints will not appear correct in the current form.
-        ## should also add a choice filter since it caused a regression last time (issue 355)
-        self.assertTrue(len(warnings) == 0)
+        self.assertTrue(len(warnings) == 8)
+        self.assertIn('Translation for English (en) missing for: jr:constraintMsg', warnings)
+        self.assertIn('Translation for English (en) missing for: image', warnings)
+        self.assertIn('Translation for English (en) missing for: hint', warnings)
+        self.assertIn('Translation for Spanish (es) missing for: image', warnings)
+        self.assertIn('Translation for Spanish (es) missing for: label', warnings)
+        self.assertIn('There is no default language set, and no language specified for: choice label for opts, Set a default language in the settings tab, or specifiy the language of this column.', warnings)
+        self.assertIn('There is no default language set, and no language specified for: hint, Set a default language in the settings tab, or specifiy the language of this column.', warnings)
+        self.assertIn('There is no default language set, and no language specified for: jr:constraintMsg, Set a default language in the settings tab, or specifiy the language of this column.', warnings)
         os.unlink(tmp.name)

@@ -101,6 +101,9 @@ class SurveyElement(dict):
         self[key] = value
 
     def __init__(self, **kwargs):
+        # a set of strings to pass up to the user as warnings
+        import ipdb; ipdb.set_trace()
+        self.internal_warnings = {'YEEEEEET'}
         for key, default in self.FIELDS.items():
             self[key] = kwargs.get(key, default())
         self._link_children()
@@ -111,6 +114,7 @@ class SurveyElement(dict):
         # themselves.
         if self.control.get("appearance") == "label" and not self.label:
             self["label"] = " "
+
 
     def _link_children(self):
         for child in self.children:
