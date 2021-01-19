@@ -706,19 +706,31 @@ class Survey(Section):
 
     def _get_column_name_from_translation_path(self, path, content_type):
         if content_type not in ["long", "guidance"]:
+            # Images, media will hit this block, as well as other content_types missing translations.
             return content_type
 
+        # in the "path", the actual column that needs the translation added should appear after the ":"
         survey_column_name_ix = path.find(":")
         if survey_column_name_ix > -1:
             return path[path.find(":") + 1 :]
+
+        # if the ":" is not present, there may be a choice label present.
+        # First check for a "-"
         if path.find("-") > -1:
+            
+            # If a "-" is present, its a choice label.
             choice_list_name = {
                 cl for cl in self.choices.keys() if cl == path[: path.find("-")]
             }
             if choice_list_name:
                 return "choice label for " + choice_list_name.pop()
 
-        # TODO - improve this function or consider a reworking of _add_empty_translations to better reflect needs.
+        # if this return is hit, we dont really know exactly what column path represents.
+        # return the full path.
+        # TODO 
+        # - improve this function 
+        # or consider a reworking of _add_empty_translations to better reflect needs
+        # or consider simply returning "path" every time, if it is more user friendly.
         return path
 
     def _setup_media(self):
