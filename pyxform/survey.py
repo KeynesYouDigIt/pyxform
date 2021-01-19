@@ -649,8 +649,6 @@ class Survey(Section):
                             form: {
                                 "text": d["text"],
                                 "output_context": d["output_context"],
-                                # TODO - consider adding more context here for downstream needs
-                                # (such as the missing translation warning, which is sometimes cryptic )
                             }
                         }
                     )
