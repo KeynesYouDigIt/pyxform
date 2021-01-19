@@ -5,6 +5,8 @@ Test language warnings.
 import os
 import tempfile
 
+import ipdb
+
 from pyxform.tests_v1.pyxform_test_case import PyxformTestCase
 
 
@@ -89,8 +91,6 @@ class LanguageWarningTest(PyxformTestCase):
         tmp = tempfile.NamedTemporaryFile(suffix=".xml", delete=False)
         tmp.close()
         survey.print_xform_to_file(tmp.name, warnings=warnings)
-
-        import ipdb; ipdb.set_trace()
         self.assertTrue(len(warnings) == 0)
         os.unlink(tmp.name)
 

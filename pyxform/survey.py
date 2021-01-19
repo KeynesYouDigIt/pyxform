@@ -11,7 +11,6 @@ import tempfile
 import xml.etree.ElementTree as ETree
 from collections import defaultdict
 from datetime import datetime
-
 from pyxform import constants
 from pyxform.utils import (
     BRACKETED_TAG_REGEX,
@@ -698,7 +697,7 @@ class Survey(Section):
                         ) if lang == 'default' else (
                             f'Translation for {lang} missing for: {column_name}'
                         )
-                        self.internal_warnings.add(missing_translation_warning)
+                        self._add_warning(missing_translation_warning)
                         self._translations[lang][path][content_type] = "-"
 
     def _get_column_name_from_translation_path(self, path, content_type):
@@ -1098,7 +1097,7 @@ class Survey(Section):
                     + ". "
                     + "Learn more: http://xlsform.org#multiple-language-support"
                 )        
-        warnings.extend(self.internal_warnings)
+        warnings.extend(self['__internal_warnings__'])
 
     def to_xml(self, validate=True, pretty_print=True, warnings=None, enketo=False):
         """
