@@ -1114,6 +1114,8 @@ class Survey(Section):
                     + ". "
                     + "Learn more: http://xlsform.org#multiple-language-support"
                 )
+        
+        # Take the internal warnings (things found during form creation logic) and add them as well.
         warnings.extend(self["__internal_warnings__"])
 
     def to_xml(self, validate=True, pretty_print=True, warnings=None, enketo=False):
